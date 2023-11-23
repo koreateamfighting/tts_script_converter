@@ -299,7 +299,7 @@ class _ResultScreen extends State<ResultScreen> {
           value: _selectedFile,
           items: filesList
               .map((e) => DropdownMenuItem(
-                    child: Text("${e}의 변환 결과"),
+                    child: Text(  "▷ ${e.substring(e.lastIndexOf('\\') + 1)}의 변환 결과"),
                     value: e,
                   ))
               .toList(),
