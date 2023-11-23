@@ -66,6 +66,9 @@ class _ResultScreen extends State<ResultScreen> {
                     actions: [
                       TextButton(
                           onPressed: () {
+                            filesList.clear();
+                            languageList.clear();
+                            beforeResult.clear();
                             Navigator.pop(context);
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (BuildContext context) =>
@@ -78,6 +81,7 @@ class _ResultScreen extends State<ResultScreen> {
                       TextButton(
                           onPressed: () {
                             Navigator.pop(context);
+
                           },
                           child: Text("아니오",
                               style: TextStyle(
@@ -295,6 +299,15 @@ class _ResultScreen extends State<ResultScreen> {
                           onPressed: () {
                             Navigator.pop(context);
                             _writeData(afterResult);
+                            final snackBar = SnackBar(
+                              duration: const Duration(milliseconds: 3000),
+                              backgroundColor: Colors.redAccent.withOpacity(0.5),
+                              content: const Text('다운로드중입니다.'),
+                            );
+
+                            // Find the ScaffoldMessenger in the widget tree
+                            // and use it to show a SnackBar.
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           },
                           child: Text("예",
                               style: TextStyle(

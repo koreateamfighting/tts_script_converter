@@ -36,17 +36,27 @@ class DragTarget extends StatefulWidget {
 }
 
 class _DragTargetState extends State<DragTarget> {
-  final scaffoldkey = GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> scaffoldkey = GlobalKey<ScaffoldState>();
   final List<XFile> _list = [];
   final List<String> filesList = [];
   final List<String> languageList = [];
-  String filepath = "";
-  String language = "";
+  late String filepath;
+  late String language;
   bool _dragging = false;
   Offset? offset;
-  var result;
+  //var result;
 
   int count = 0;
+
+  void initState(){
+    print("안녕하세요 ^^");
+    scaffoldkey = GlobalKey<ScaffoldState>();
+    _list.clear();
+    filesList.clear();
+    languageList.clear();
+    filepath = "";
+    language = "";
+  }
 
   @override
   Widget build(BuildContext context) {
