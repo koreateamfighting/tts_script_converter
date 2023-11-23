@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 
-
 class ResultScreen extends StatefulWidget {
   const ResultScreen(
       {super.key, required this.filesList, required this.languageList});
@@ -33,6 +32,9 @@ class _ResultScreen extends State<ResultScreen> {
   void initState() {
     super.initState();
     setState(() {
+      for(int i =0 ; i < languageList.length; i++){
+        print(languageList[i]);
+      }
       _selectedFile = filesList[0];
       afterResult = getExcelData(filesList);
       //이곳에 오류사전 부르기
@@ -54,7 +56,7 @@ class _ResultScreen extends State<ResultScreen> {
               width: 12,
             ),
             //☞ back button
-      new SizedBox(
+            new SizedBox(
               width: 200,
               height: 50,
               child: ElevatedButton(
@@ -107,15 +109,16 @@ class _ResultScreen extends State<ResultScreen> {
               width: 200,
               height: 50,
               child: ElevatedButton(
-                onPressed: isGrammarCheckButton? () {
-                  setState(() {
-                    isGrammarCheckButton = false;
-                    fileIndex = filesList.indexOf(_selectedFile);
-                    _onSetText(fileIndex);
-                    isGrammarCheck = !isGrammarCheck;
-
-                  });
-                }:null,
+                onPressed: isGrammarCheckButton
+                    ? () {
+                        setState(() {
+                          isGrammarCheckButton = false;
+                          fileIndex = filesList.indexOf(_selectedFile);
+                          _onSetText(fileIndex);
+                          isGrammarCheck = !isGrammarCheck;
+                        });
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.redAccent.withOpacity(0.4)),
                 child: Row(
@@ -148,112 +151,99 @@ class _ResultScreen extends State<ResultScreen> {
                   value: isEdited,
                   onChanged: (bool value) {
                     fileIndex = filesList.indexOf(_selectedFile);
-                   if(isEdited==false){
-                     if(isGrammarCheck==true){
+                    if (isEdited == false) {
+                      if (isGrammarCheck == true) {
+                        //print("에디팅 off=> on 상황  : 그래머 체크를 한 이후에 버튼을 누르려 할때");
+                        setState(() {
+                          _onChangedTextController(fileIndex);
 
-                       //print("에디팅 off=> on 상황  : 그래머 체크를 한 이후에 버튼을 누르려 할때");
-                       setState(() {
+                          isGrammarCheck = false;
+                          isGrammarCheckButton = false;
+                          isTextView = !isTextView;
+                          isSaved = !isSaved;
+                          _onSwitchChanged(value);
+                        });
+                      } else {
+                        // print("에디팅 off=> on 상황 : 그래머 체크를 하지 않고 버튼을 누르려 할때");
+                        setState(() {
+                          _onChangedTextController(fileIndex);
 
-                         _onChangedTextController(fileIndex);
+                          isGrammarCheckButton = false;
+                          isTextView = !isTextView;
+                          isSaved = !isSaved;
+                          _onSwitchChanged(value);
+                        });
+                      }
+                    } else {
+                      if (beforeResult[fileIndex] == resultController.text) {
+                        setState(() {
+                          //print("에디팅 on => off 상황 : 수정한 내용이 없을 때 ");
+                          _onChangedTextController(fileIndex);
+                          isGrammarCheckButton = true;
+                          isTextView = !isTextView;
+                          isSaved = !isSaved;
+                          _onSwitchChanged(value);
+                        });
+                      } else {
+                        //print("에디팅 on => off 상황 : 수정한 내용이 있을 경우");
+                        AlertDialog alert = AlertDialog(
+                          content: Text("변경된 내용이 있습니다. 저장하시겠습니까?"),
+                          actions: [
+                            TextButton(
+                                onPressed: () {
+                                  fileIndex = filesList.indexOf(_selectedFile);
+                                  afterResult[fileIndex] =
+                                      resultController.text;
+                                  setState(() {
+                                    isGrammarCheckButton = true;
+                                    isEdited = false;
+                                    isTextView = false;
+                                    isSaved = false;
+                                  });
 
-
-                         isGrammarCheck = false;
-                         isGrammarCheckButton = false;
-                         isTextView = !isTextView;
-                         isSaved = !isSaved;
-                         _onSwitchChanged(value);
-
-                       });
-                     }else{
-                      // print("에디팅 off=> on 상황 : 그래머 체크를 하지 않고 버튼을 누르려 할때");
-                       setState(() {
-
-
-                         _onChangedTextController(fileIndex);
-
-                         isGrammarCheckButton = false;
-                         isTextView = !isTextView;
-                         isSaved = !isSaved;
-                         _onSwitchChanged(value);
-                       });
-                     }
-                   }
-
-
-
-                   else{
-
-                     if(beforeResult[fileIndex] == resultController.text){
-                       setState(() {
-                         //print("에디팅 on => off 상황 : 수정한 내용이 없을 때 ");
-                         _onChangedTextController(fileIndex);
-                         isGrammarCheckButton = true;
-                         isTextView = !isTextView;
-                         isSaved = !isSaved;
-                         _onSwitchChanged(value);
-                       });
-
-                     }else{
-                       //print("에디팅 on => off 상황 : 수정한 내용이 있을 경우");
-                       AlertDialog alert = AlertDialog(
-                         content: Text("변경된 내용이 있습니다. 저장하시겠습니까?"),
-                         actions: [
-                           TextButton(
-                               onPressed: () {
-                                 fileIndex = filesList.indexOf(_selectedFile);
-                                 afterResult[fileIndex] = resultController.text;
-                                 setState(() {
-                                   isGrammarCheckButton = true;
-                                   isEdited = false;
-                                   isTextView = false;
-                                   isSaved = false;
-                                 });
-
-                                 Navigator.pop(context);
-                               },
-                               child: Text("저장",
-                                   style: TextStyle(
-                                     color: Colors.red.withOpacity(0.4),
-                                   ))),
-                           TextButton(
-                               onPressed: () {
-                                 fileIndex = filesList.indexOf(_selectedFile);
-                                 setState(() {
-                                   resultController.text =
-                                   beforeResult[fileIndex];
-                                 });
-                                 Navigator.pop(context);
-                                 setState(() {
-                                   isGrammarCheckButton = true;
-                                   isEdited = false;
-                                   isTextView = false;
-                                   isSaved = false;
-                                 });
-                               },
-                               child: Text("저장안함",
-                                   style: TextStyle(
-                                     color: Colors.red.withOpacity(0.4),
-                                   ))),
-                           TextButton(
-                               onPressed: () {
-                                 Navigator.pop(context);
-                               },
-                               child: Text("취소",
-                                   style: TextStyle(
-                                     color: Colors.red.withOpacity(0.4),
-                                   ))),
-                         ],
-                       );
-                       showDialog(
-                           context: context,
-                           builder: (BuildContext context) {
-                             return alert;
-                           });
-
-                     }
-                   }
-                  }
-                  ),
+                                  Navigator.pop(context);
+                                },
+                                child: Text("저장",
+                                    style: TextStyle(
+                                      color: Colors.red.withOpacity(0.4),
+                                    ))),
+                            TextButton(
+                                onPressed: () {
+                                  fileIndex = filesList.indexOf(_selectedFile);
+                                  setState(() {
+                                    resultController.text =
+                                        beforeResult[fileIndex];
+                                  });
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    isGrammarCheckButton = true;
+                                    isEdited = false;
+                                    isTextView = false;
+                                    isSaved = false;
+                                  });
+                                },
+                                child: Text("저장안함",
+                                    style: TextStyle(
+                                      color: Colors.red.withOpacity(0.4),
+                                    ))),
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text("취소",
+                                    style: TextStyle(
+                                      color: Colors.red.withOpacity(0.4),
+                                    ))),
+                          ],
+                        );
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return alert;
+                            });
+                      }
+                    }
+                  }),
             ),
 
             SizedBox(
@@ -347,18 +337,17 @@ class _ResultScreen extends State<ResultScreen> {
           value: _selectedFile,
           items: filesList
               .map((e) => DropdownMenuItem(
-                    child: Text(  "▷ ${e.substring(e.lastIndexOf('\\') + 1)}의 변환 결과"),
+                    child: Text(
+                        "▷ ${e.substring(e.lastIndexOf('\\') + 1)}의 변환 결과"),
                     value: e,
                   ))
               .toList(),
           onChanged: (value) {
-
             setState(() {
               _selectedFile = value!;
               fileIndex = filesList.indexOf(_selectedFile);
-             _onChangedTextController(fileIndex);
+              _onChangedTextController(fileIndex);
             });
-
           },
         )),
         SizedBox(
@@ -368,7 +357,8 @@ class _ResultScreen extends State<ResultScreen> {
         Visibility(
           child: Text(
             "(Check Result)",
-            style: TextStyle(fontStyle: FontStyle.italic),
+            style:
+                TextStyle(fontStyle: FontStyle.italic, color: Colors.redAccent),
           ),
           visible: isGrammarCheck,
         ),
@@ -376,7 +366,8 @@ class _ResultScreen extends State<ResultScreen> {
         Visibility(
           child: Text(
             "(Edit Mode)",
-            style: TextStyle(fontStyle: FontStyle.italic),
+            style:
+                TextStyle(fontStyle: FontStyle.italic, color: Colors.redAccent),
           ),
           visible: isTextView,
         ),
@@ -391,19 +382,18 @@ class _ResultScreen extends State<ResultScreen> {
                   readOnly: !isEdited,
                   controller: resultController,
                   maxLines: null,
-                      decoration: InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.redAccent.withOpacity(0.4))
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.redAccent.withOpacity(0.4))
-                        )
-                      ),
-                      
+                  decoration: InputDecoration(
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.redAccent.withOpacity(0.4))),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.redAccent.withOpacity(0.4)))),
                 ))))
       ],
     ));
   }
+
   //☞ 홈스크린에서 가져온 엑셀 파일들을 가져오는 함수
   List<String> getExcelData(List<String> filesList) {
     String output = '';
@@ -425,29 +415,31 @@ class _ResultScreen extends State<ResultScreen> {
         // }
         Sheet sheetObject = excel[table];
 
-        for (int a = 4; a < excel.tables[table]!.maxRows; a++) {
-          if (sheetObject
-                      .cell(CellIndex.indexByColumnRow(
-                          columnIndex: 4, rowIndex: a))
-                      .value
-                      .toString() ==
-                  "New" ||
-              sheetObject
-                      .cell(CellIndex.indexByColumnRow(
-                          columnIndex: 4, rowIndex: a))
-                      .value
-                      .toString() ==
-                  "Changed") {
-            output +=
-                "${sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: a)).value}\;\n${sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: a)).value}\n\n";
+          for (int a = 4; a < excel.tables[table]!.maxRows; a++) {
+            if (sheetObject
+                        .cell(CellIndex.indexByColumnRow(
+                            columnIndex: (languageList[i] =="eng"? 3:4), rowIndex: a))
+                        .value
+                        .toString() ==
+                    "New" ||
+                sheetObject
+                        .cell(CellIndex.indexByColumnRow(
+                            columnIndex: (languageList[i] =="eng"? 3:4), rowIndex: a))
+                        .value
+                        .toString() ==
+                    "Changed") {
+              output +=
+                  "${sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: a)).value}\;\n${sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: (languageList[i] =="eng"? 2:3), rowIndex: a)).value}\n\n";
+            }
           }
-        }
+
       }
       beforeResult.add(output);
     }
 
     return beforeResult;
   }
+
   //☞  텍스트필드에 유저가 지정한 엑셀파일들의 인덱스로 해당 파일의 컨버팅된 결과를 반환
   TextEditingController _onChangedTextController(int index) {
     Future.delayed(const Duration(milliseconds: 30), () {
@@ -459,8 +451,9 @@ class _ResultScreen extends State<ResultScreen> {
 
     return resultController;
   }
+
   //☞  검증모드시 텍스트필드는 텍스트모드로 전환됨. 따라서 해당 인덱스에 따라 컨버팅된 결과를 반환
-  String _onSetText(int index){
+  String _onSetText(int index) {
     Future.delayed(const Duration(milliseconds: 30), () {
       resultController.text = afterResult[index];
       resultController.selection =
@@ -470,6 +463,7 @@ class _ResultScreen extends State<ResultScreen> {
 
     return resultController.text;
   }
+
   //☞ 최종 결과 (afterResult) 리스트를 받아 지정된 경로에 다운로드 하는 함수
   Future<void> _writeData(List<String> afterResult) async {
     final dirPath = await _getDirPath();
@@ -479,19 +473,21 @@ class _ResultScreen extends State<ResultScreen> {
       await myFile.writeAsString(afterResult[i]);
     }
   }
+
   //☞  _selectFolder에 이어서 선택된 경로 지정 함수
   Future<String> _getDirPath() async {
     final dir = await _selectFolder();
     return dir;
   }
+
   //☞  폴더 선택 함수
   Future<String> _selectFolder() async {
     final path = await FilePicker.platform.getDirectoryPath();
     return path.toString();
   }
+
   //☞  수정모드 on/off 함수
   void _onSwitchChanged(bool value) {
     isEdited = value;
   }
-
 }

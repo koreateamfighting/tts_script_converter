@@ -11,7 +11,15 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.pink[50],
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Row(children: [Icon(Icons.edit_note),SizedBox(width: 15,),Text('TTS Script File Converter')],),
+          title: const Row(
+            children: [
+              Icon(Icons.edit_note),
+              SizedBox(
+                width: 15,
+              ),
+              Text('TTS Script File Converter')
+            ],
+          ),
           backgroundColor: Colors.redAccent.withOpacity(0.6),
         ),
         body: Center(
@@ -44,12 +52,13 @@ class _DragTargetState extends State<DragTarget> {
   Widget build(BuildContext context) {
     return DropTarget(
         onDragDone: (detail) async {
-          debugPrint('onDragDone:');
+          //debugPrint('onDragDone:');
           for (final file in detail.files) {
             count++;
-            print("${count}번째 파일 ");
-            print("${file.name}");
+           // print("${count}번째 파일 ");
+           // print("${file.name}");
             filesList.add(file.path);
+
             // debugPrint('  ${file.path} ${file.name}'
             //     '  ${await file.lastModified()}'
             //     '  ${await file.length()}'
@@ -64,11 +73,12 @@ class _DragTargetState extends State<DragTarget> {
               });
             }
           }
+          for(int i = 0; i < filesList.length; i++) {
+            print("들어간 파일들 : ${filesList[i]}");
+          }
 
           languageRegister(filesList);
-          // for(int i = 0; i < filesList.length; i++) {
-          //   print("들어간 파일들 : ${filesList[i]}");
-          // }
+
         },
         onDragUpdated: (details) {
           setState(() {
@@ -174,21 +184,44 @@ class _DragTargetState extends State<DragTarget> {
 
   Future<List<String>> languageRegister(filesList) async {
     for (int i = 0; i < filesList.length; i++) {
-      if (filesList[i].split('_')[2] == "Portuguese") {
+      print("자른 대상 : ${filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[3]}");
+      if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Portuguese") {
         language = "ptp";
-      } else if (filesList[i].split('_')[2] == "Czech") {
+      } else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Czech") {
         language = "czc";
-      } else if (filesList[i].split('_')[2] == "Slovakia") {
+      } else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Slovakia") {
         language = "sks";
-      } else if (filesList[i].split('_')[2] == "Swedish") {
+      } else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Swedish") {
         language = "sws";
-      } else if (filesList[i].split('_')[2] == "Czech") {
+      } else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Czech") {
         language = "czc";
-      } else if (filesList[i].split('_')[2] == "Turkish") {
+      } else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Turkish") {
         language = "trt";
-      } else if (filesList[i].split('_')[2] == "Croatian") {
+      } else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Croatian") {
         language = "hrh";
-      } else {
+      } else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Dutch") {
+        language = "dun";
+      } else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Italian") {
+        language = "iti";
+      }
+      else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "Norwegian") {
+        language = "non";
+      }
+      else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "UK") {
+        language = "eng";
+      }
+      else if (filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[2] == "European") {
+         if(filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[3] == "French"){
+           language = "fif";
+         }
+         else if(filesList[i].substring(filesList[i].lastIndexOf('\\')).split('_')[3] == "Spanish"){
+           language = "spe";
+         }
+         else {
+           language = "unknown";
+         };
+      }
+      else {
         language = "unknown";
       }
       languageList.add(language);
